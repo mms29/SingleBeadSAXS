@@ -1,7 +1,13 @@
 # SingleBeadSAXS
 
 ## Install
+Install:
+```
+git clone https://github.com/mms29/SingleBeadSAXS.git
+cd SingleBeadSAXS
+```
 
+Required env : 
 ```
 conda create -n singlebeadsaxs python=3.8 -y
 conda activate singlebeadsaxs
