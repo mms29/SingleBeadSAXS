@@ -24,9 +24,10 @@ tar xzvf dunbrack_rotamer.tar.gz
 ## Run
 ```
 mkdir outputs
+
+# for single beads
 python ./single_bead_formfactor.py outputs/single_beads
-```
-or (martini)
-```
+
+# for martini beads
 python ./single_bead_formfactor.py outputs/martini_beads --martini_beads
 ```
