@@ -298,7 +298,6 @@ def map_pyrosetta_atom_names(atom_names, restype3):
 def map_pyrosetta_martini_names(atom_names, restype3, martini_mapping):
     martini_mapped = []
     for k in [v.strip() for v in atom_names]:
-        print(k)
         if k not in martini_mapping[restype3]:
             martini_mapped.append(None)
         else:

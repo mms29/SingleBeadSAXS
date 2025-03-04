@@ -61,7 +61,7 @@ def main(args):
         all_coordinates, atom_names,elements, probs = all_atom_coordinates_from_restype(restype, db)
         n_rotamer = len(all_coordinates)
 
-        print("Number of rotamers found in Dunback lib: %i"%n_rotamer)
+        print("Number of rotamers found in Dunbrack lib: %i"%n_rotamer)
 
         atom_names_mapped = map_pyrosetta_atom_names(atom_names, restype3)
 
