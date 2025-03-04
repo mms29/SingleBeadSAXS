@@ -35,13 +35,28 @@ def main(args):
     no_q = 2001
     q = np.linspace(0.0,max_q,no_q)
 
+    # Read the rotamer library
     db = load_rotamor_library(libpath)
-    outdf = pd.DataFrame(q)
 
+    # if resume option is True, we read the output csv and continue. 
+    if args.resume:
+        outdf = pd.read_csv(output_ff_file)
+    #Otherwise we initialize the output dataframe
+    else:
+        outdf = pd.DataFrame()
+        outdf["q"] = q
+
+    # Loop over the residues
     for restype in restype_1to3.keys():
 
         restype3 = restype_1to3[restype]
         print("\n > Calculating bead form factor for %s ..."%restype3)
+
+        # if the residue is already calculated, skip ...
+        if args.resume:
+            if restype3 in [i.strip().split("_")[0] for i in list(outdf.keys())]:
+                continue
+
 
         all_coordinates, atom_names,elements, probs = all_atom_coordinates_from_restype(restype, db)
         n_rotamer = len(all_coordinates)
@@ -128,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument( "output_prefix", type=str, help="")
     parser.add_argument( "--libpath", type=str,help="", default="./dunbrack-rotamer/original/")
     parser.add_argument( "--martini_beads", action='store_true')
+    parser.add_argument( "--resume", action='store_true')
     parser.add_argument( "--martini_mapping_path", type=str,help="", default="./martini_mapping")
     args = parser.parse_args()
     main(args)

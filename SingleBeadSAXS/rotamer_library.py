@@ -50,7 +50,8 @@ chi_angles_mask = [
     [1.0, 0.0, 0.0, 0.0],  # THR
     [1.0, 1.0, 0.0, 0.0],  # TRP
     [1.0, 1.0, 0.0, 0.0],  # TYR
-    [1.0, 0.0, 0.0, 0.0],  # VAL
+    # [1.0, 0.0, 0.0, 0.0],  # VAL
+    [0.0, 0.0, 0.0, 0.0],  # VAL
 ]
 
 restype_1to3 = {
@@ -169,7 +170,7 @@ def all_atom_coordinates_from_restype(restype, db):
     elements = names_from_pose(pose, element_or_name=True)
 
     # all residues with side_chains
-    if restype3.lower() in db:
+    if restype3.lower() in db and restype3 != "VAL": # for VAL, we don't calculate the rotamers
 
         db_res = db[restype3.lower()]
         backbone_confs = db_res[['Phi', 'Psi']].drop_duplicates().to_numpy()
@@ -189,7 +190,7 @@ def all_atom_coordinates_from_restype(restype, db):
         pose.set_phi(1, rotamer.Phi)
         pose.set_psi(1, rotamer.Psi)
         for i in range(num_chi):
-            pose.set_chi(1+1, 1, rotamer.__getattribute__("chi%iVal"%(i+1)))
+            pose.set_chi(1+i, 1, rotamer.__getattribute__("chi%iVal"%(i+1)))
 
         coords = coords_from_pose(pose)
         all_coordinates.append(coords)
