@@ -90,7 +90,8 @@ def main(args):
         ffDummy =  np.array([[saxs_params.getDummyAtomsFactorCorr0(_q, i) for _q in q]
                 for i in atom_names_mapped_non_hydrogen])
 
-        ff_excl = ff -ffDummy
+        # ff_excl = ff -ffDummy
+        ff_excl = ff #-ffDummy
 
         # Output form factor
         F = np.zeros_like(all_coordinates_non_hydrogen, shape=(n_beads, n_rotamer, no_q))
