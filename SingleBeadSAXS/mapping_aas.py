@@ -276,7 +276,7 @@ pdb_atom_map, atom_map, pdb_map = mapping_amino(params)
 # print("Atom Map:", atom_map.mapping)
 # print("PDB Map:", pdb_map.mapping)
 
-
+### Function which maps the atom names of a residue to the corresponding group in the mapping ###
 def map_pyrosetta_atom_names(atom_names, restype3):
     atom_names_mapped = []
     for k in [v.strip() for v in atom_names]:
@@ -294,7 +294,7 @@ def map_pyrosetta_atom_names(atom_names, restype3):
             atom_names_mapped.append(None) # I append nothing here just to remove it later
     return atom_names_mapped
 
-
+### Functions which maps the atom names of a residue to the corresponding martini group ###
 def map_pyrosetta_martini_names(atom_names, restype3, martini_mapping):
     martini_mapped = []
     for k in [v.strip() for v in atom_names]:
@@ -305,7 +305,7 @@ def map_pyrosetta_martini_names(atom_names, restype3, martini_mapping):
     return martini_mapped
 
 import os
-from SingleBeadSAXS.rotamer_library import restypes3
+from rotamer_library import restypes3
 
 # Read the file of Martini mapping for one residue
 def read_mapping_martini(file):

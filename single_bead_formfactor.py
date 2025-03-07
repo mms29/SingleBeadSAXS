@@ -141,7 +141,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument( "output_prefix", type=str, help="")
-    parser.add_argument( "--libpath", type=str,help="", default="./dunbrack-rotamer/original/")
+    parser.add_argument( "--libpath", type=str,help="", default="../saxs-python/dunbrack-rotamer/original/")
     parser.add_argument( "--martini_beads", action='store_true')
     parser.add_argument( "--resume", action='store_true')
     parser.add_argument( "--martini_mapping_path", type=str,help="", default="./martini_mapping")
