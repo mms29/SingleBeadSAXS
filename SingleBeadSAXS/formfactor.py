@@ -5,7 +5,6 @@ import numpy as np
 import cmath
 from scipy.optimize import minimize
 from functools import partial
-import tqdm
 ### Class cSaXSparameters ###
 # This class is used to calculate the form factors of the atoms and then amino acids in the protein structure.
 # The class contains the following methods:
@@ -111,8 +110,8 @@ class cSAXSparameters:
         if q == 0:
             f = fc + F.h * fh
         else:
-            #f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh))
-            f = fc + F.h * fh * np.sin(q * F.rh) / (q * F.rh)
+            f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh))
+            #f = fc + F.h * fh * np.sin(q * F.rh) / (q * F.rh)
         return f
 
     def getGroupFormFactor2(self, q, c1, F1, c2, F2):
@@ -152,29 +151,26 @@ class cSAXSparameters:
         return atomffs # returning the exclusion form factors - have removed the displaced solvent contribution
 
     
-    def getAAFormFactor(self, qval, atomffs, params, coords):
-        Factors = np.zeros_like(atomffs)
+    def getAAFormFactor(self, qval, atomffs, coords):
+        
         dgram = np.sqrt(np.sum((coords[..., None, :] - coords[..., None, :, :]) ** 2, axis=-1))
-        print(dgram.shape)
+        dq = dgram[..., None] * qval
+
         aff_matrix = (atomffs[None] * atomffs[:, None])
-        ffmat = (atomffs[..., None, :, :] * atomffs[..., :, None, :])
-        print("FF:", aff_matrix.shape, ffmat.shape, "atomffs:", atomffs.shape)
-        print("Factors:", Factors.shape)
+
+        
+        aff_matrix = np.tile(aff_matrix, (len(coords), 1, 1, 1))
+        Factors = np.zeros_like(aff_matrix)
+        
         #for itr, qval in enumerate(q):
+        print(Factors.shape)
+        diag = dq == 0
         
-        
-        for i in tqdm.tqdm(range(dgram.shape[0])):
-            dq = dgram[i][...,None] * qval[...,None,:]
-            print("dq", dq.shape, qval[...,None,:].shape)
-            FF = atomffs * atomffs[i][None]
-            zeros = dq < 1e-6
-            print(zeros.shape, Factors.shape)
-            Factors[zeros] += FF[zeros] * (1)
-            Factors[~zeros] += aff_matrix[~zeros] * (np.sin(dq[~zeros]) / dq[~zeros])
-            
-        
-        #Factors[...,qval==0] = np.sum(atomffs[...,qval==0]) # for q = 0
-        return np.sqrt(np.sum(Factors, axis=(-2)))
+        Factors[diag] = aff_matrix[diag] * (1)
+        Factors[~diag] = aff_matrix[~diag] * (np.sin(dq[~diag]) / dq[~diag])
+        Factors = np.sqrt(np.sum(Factors, axis=(-2,-3)))
+        Factors[...,qval==0] = np.sum(atomffs[...,qval==0]) # for q = 0
+        return Factors
 
 
 # Calculate distances 
