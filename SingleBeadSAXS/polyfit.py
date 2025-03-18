@@ -11,16 +11,6 @@ pr.init()
 libpath = '/Users/isabelvinterbladh/Documents/Github/saxs-python/dunbrack-rotamer/original'
 db = load_rotamor_library(libpath)
 
-def getAll_FF(qvals, atom_names_mapped_non_hydrogen, all_coordinates_non_hydrogen):
-    saxs_params = cSAXSparameters()
-    FF = np.array([saxs_params.computeFormFactors(atom_names_mapped_non_hydrogen, q) for q in qvals]).T
-    #for atoms in all_coordinates_non_hydrogen:
-     #   all_rotamers = []
-     #   for i, _q in enumerate(qvals):
-            
-    amino_FF = saxs_params.getAAFormFactor(qvals, FF, all_coordinates_non_hydrogen) 
-    return amino_FF #np.array(total, dtype=complex)
-
 with open('poly_coeffs.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['Restype', 'Coefficient Index', 'Value'])
@@ -35,24 +25,24 @@ with open('poly_coeffs.csv', 'w', newline='') as csvfile:
         print(atom_names, restype3)
         
         atom_names_mapped = map_pyrosetta_atom_names(atom_names, restype3)
+        atom_names_mapped[4] = None # setting the OXT atom to None - it will be removed from mapping with the hydrogens
         # let's remove the hydrogrens from the coordinates
         non_hydrogen_indices = [i for i, n in enumerate(atom_names_mapped) if n is not None]
         all_coordinates_non_hydrogen = all_coordinates[:,non_hydrogen_indices]
         atom_names_mapped_non_hydrogen = [n for i, n in enumerate(atom_names_mapped) if i in non_hydrogen_indices]
-        qfits = np.linspace(0.75, 2, 100)
+        print(atom_names_mapped_non_hydrogen)
+        qfits = np.linspace(0.75, 2, 50)
         qfits = np.insert(qfits, 0, 0.0)
         #print((np.sqrt(np.sum((coords[..., None, :] - coords[..., None, :, :]) ** 2, axis=-1))[...,None]*qfits))
         
+        saxs_params = cSAXSparameters()
+        FF = np.array([saxs_params.computeFormFactors(atom_names_mapped_non_hydrogen, q) for q in qfits]).T
+        FFs = np.zeros((len(qfits)))
+        for i, q in enumerate(qfits):
+            amino_FF = saxs_params.getAAFormFactor(q, FF[:,i], all_coordinates_non_hydrogen)
+            FFs[i] = np.sum((amino_FF)*probs, axis=0)
         
-        total = getAll_FF(qfits, atom_names_mapped_non_hydrogen, all_coordinates_non_hydrogen)
-        #print(total.shape)
-        
-        V = np.sum((total)*probs[...,None], axis=0)
-        #F0 = getAll_FF([0.0], atom_names_mapped_non_hydrogen, all_coordinates_non_hydrogen)
-        #qfits = np.insert(qfits, 0, 0.0)
-        #V = np.insert(V, 0, np.sum(F0))
-        
-        poly_coeffs = poly6d_fixed(qfits, V)
+        poly_coeffs = poly6d_fixed(qfits, FFs)
         # Save poly_coeffs to a CSV fil
         coeffs = poly_coeffs.keywords['coeffs']
         for i, coeff in enumerate(coeffs):

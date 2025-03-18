@@ -142,6 +142,7 @@ def names_from_pose(pose, element_or_name=True):
         else:
             atom_names.append(res.atom_name(i))
     return atom_names
+
 def coords_from_pose(pose):
     res= pose.residue(1)
 

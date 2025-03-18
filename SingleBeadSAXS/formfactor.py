@@ -2,7 +2,6 @@
 # Author: Isabel Vinterbladh
 # This file contains the class cSaXSparameters which is used to calculate the form factors of the atoms and then amino acids in the protein structure.
 import numpy as np
-import cmath
 from scipy.optimize import minimize
 from functools import partial
 ### Class cSaXSparameters ###
@@ -127,7 +126,7 @@ class cSAXSparameters:
         else:
             f2 = self.getGroupFormFactor(q, F2)
 
-        return c1 * f1 + c2 * f2  #- F1.dsv*0.334*np.exp(-np.pi*q2*F1.dsv**(2/3)) * F2.dsv*0.334*np.exp(-np.pi*q2*F2.dsv**(2/3))
+        return c1 * f1 + c2 * f2  
     
     def getDummyAtomsFactor(self, q, G):
         G = self.fj[G]
@@ -147,30 +146,29 @@ class cSAXSparameters:
     def computeFormFactors(self, params, q):
         atomffs = np.zeros(len(params)) # form factors for the atoms
         for nr, it in enumerate(params):
-            atomffs[nr] = self.getFormFactor(q, it) #- self.getDummyAtomsFactorCorr0(q, it) # remove the dummy atoms contribution
+            atomffs[nr] = self.getFormFactor(q, it) - self.getDummyAtomsFactorCorr0(q, it)  #remove the dummy atoms contribution
         return atomffs # returning the exclusion form factors - have removed the displaced solvent contribution
 
     
     def getAAFormFactor(self, qval, atomffs, coords):
-        
-        dgram = np.sqrt(np.sum((coords[..., None, :] - coords[..., None, :, :]) ** 2, axis=-1))
-        dq = dgram[..., None] * qval
-
-        aff_matrix = (atomffs[None] * atomffs[:, None])
-
-        
-        aff_matrix = np.tile(aff_matrix, (len(coords), 1, 1, 1))
-        Factors = np.zeros_like(aff_matrix)
-        
-        #for itr, qval in enumerate(q):
-        print(Factors.shape)
-        diag = dq == 0
-        
-        Factors[diag] = aff_matrix[diag] * (1)
-        Factors[~diag] = aff_matrix[~diag] * (np.sin(dq[~diag]) / dq[~diag])
-        Factors = np.sqrt(np.sum(Factors, axis=(-2,-3)))
-        Factors[...,qval==0] = np.sum(atomffs[...,qval==0]) # for q = 0
-        return Factors
+        if qval == 0:
+            return np.sum(atomffs) # returning the sum of the form factors when q is 0
+        else:
+            #calculate the distance matrix
+            dgram = np.sqrt(np.sum((coords[..., None, :] - coords[..., None, :, :]) ** 2, axis=-1))
+            #create the qr matrix
+            dq = dgram * qval
+            #create the form factor matrix
+            aff_matrix = (atomffs[None] * atomffs[:, None])
+            #create the amino acid form factors matrix
+            aff_matrix = np.tile(aff_matrix, (len(coords), 1, 1))
+            Factors = np.zeros_like(aff_matrix)
+            # calculate the aa form factors
+            diag = dq <1e-6
+            Factors[diag] = aff_matrix[diag] * (1 - 1/6 * (dq[diag])**2)
+            Factors[~diag] = aff_matrix[~diag] * (np.sin(dq[~diag]) / dq[~diag])
+            
+        return np.sqrt(np.sum(Factors, axis=(1,2)))
 
 
 # Calculate distances 
@@ -186,7 +184,7 @@ def getAAFormFactor_fast(dgram, q, ff, eps=1e-6):
     # implements Eq.10 and Eq.11
 
     # distance * q
-    dq = dgram[..., None] * q
+    dq = dgram * q
 
     # ff in matrix form
     ffmat = (ff[None] * ff[:, None])
