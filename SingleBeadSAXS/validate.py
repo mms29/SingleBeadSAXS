@@ -1,7 +1,4 @@
 
-# import matplotlib
-# matplotlib.use('TkAgg',force=True)
-import matplotlib.pyplot as plt
 import pyrosetta as pr
 import numpy as np
 import pandas as pd
@@ -38,8 +35,9 @@ def debye(dgram, q, ff, mask=None, eps=1e-6):
     
 def debye_mem(dgram, q, ff, eps=1e-6):
     F = np.zeros_like(ff)
+    print(F.shape)
     N = dgram.shape[0]
-
+    print(N)
     for i in tqdm.tqdm(range(N)):
         dq = dgram[i][...,None] * q[..., None, :]
         indices_zeros = dq<eps
@@ -154,10 +152,10 @@ FOXS_ENV_COMMAND = """
 
 pdb_file= "/home/vuillemr/Workspace/SAXS/validate/6z6u.pdb"
 
-pepsi_curve = profile_pepsi(pdb_file)
-foxs_curve = profile_foxs(pdb_file)
+#pepsi_curve = profile_pepsi(pdb_file)
+#foxs_curve = profile_foxs(pdb_file)
 singlebead_curve = profile_singlebead(pdb_file, memory_efficient=True,center_of_mass=True)
-
+""" 
 kwargs = {"ls" : "-", "marker" : None, "linewidth":1.0}
 
 fig, ax = plt.subplots(1,1, layout="constrained", figsize=(6,4))
@@ -169,7 +167,7 @@ ax.set_xlabel("q (1/$\AA$)", fontsize=14)
 ax.set_ylabel("I(q)", fontsize=14)
 ax.legend()
 fig.show()
-
+"""
 
 
 

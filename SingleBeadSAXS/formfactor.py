@@ -2,9 +2,6 @@
 # Author: Isabel Vinterbladh
 # This file contains the class cSaXSparameters which is used to calculate the form factors of the atoms and then amino acids in the protein structure.
 import numpy as np
-import cmath
-
-
 from scipy.optimize import minimize
 from functools import partial
 ### Class cSaXSparameters ###
@@ -24,11 +21,7 @@ from functools import partial
 # 12. getr_kl: Calculates the position vector of an atom in the structure relative to the center of mass.
 
 class cSAXSparameters:
-    def __init__(self, params, q, curve, curveDummy):
-        self.params = params
-        self.q = q
-        self.curve = curve
-        self.curveDummy = curveDummy
+    def __init__(self):
         self.fj = {}
         self.paramsFormFactors()
 
@@ -116,9 +109,9 @@ class cSAXSparameters:
         if q == 0:
             f = fc + F.h * fh
         else:
-            # f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh))
-            f = fc + F.h * fh * np.sin(q * F.rh) / (q * F.rh)
-        return f #- F.dsv*0.334*np.exp(-np.pi*q2*F.dsv**(2/3))
+            f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh))
+            #f = fc + F.h * fh * np.sin(q * F.rh) / (q * F.rh)
+        return f
 
     def getGroupFormFactor2(self, q, c1, F1, c2, F2):
         q2 = q * q / (4 * np.pi * np.pi)
@@ -133,7 +126,7 @@ class cSAXSparameters:
         else:
             f2 = self.getGroupFormFactor(q, F2)
 
-        return c1 * f1 + c2 * f2  #- F1.dsv*0.334*np.exp(-np.pi*q2*F1.dsv**(2/3)) * F2.dsv*0.334*np.exp(-np.pi*q2*F2.dsv**(2/3))
+        return c1 * f1 + c2 * f2  
     
     def getDummyAtomsFactor(self, q, G):
         G = self.fj[G]
@@ -150,72 +143,32 @@ class cSAXSparameters:
         factor = q2 * np.pi * pow(V, 2.0 / 3.0)
         return p * V * np.exp(-factor)
 
-    def computeFormFactors(self, params, q, curve, curveDummy):
-      # now calculate the two curves...
-        for it in params:
-            #for s in range(len(self.q)):
-            q = self.q
-                
-            curve[it] = self.getFormFactor(q, it) 
-            curveDummy[it] = self.getDummyAtomsFactorCorr0(q, it)
-        
-        return curve, curveDummy
+    def computeFormFactors(self, params, q):
+        atomffs = np.zeros(len(params)) # form factors for the atoms
+        for nr, it in enumerate(params):
+            atomffs[nr] = self.getFormFactor(q, it) - self.getDummyAtomsFactorCorr0(q, it)  #remove the dummy atoms contribution
+        return atomffs # returning the exclusion form factors - have removed the displaced solvent contribution
 
     
-    def getAAFormFactor(self, qval, curve, params, df_struct):
-        factors = 0
-        def getr_kl(df_struct, k, l):
-            a1 = df_struct[k]
-            a2 = df_struct[l]
-            
-            x = a1[1]-a2[1]
-            y = a1[2]-a2[2]
-            z = a1[3]-a2[3]
-            return np.sqrt(x**2 + y**2 + z**2)
-        #for itr, qval in enumerate(q):
-        if qval == 0.0:
-            for p in range(0,len(params)):
-                factors += curve[params[p]]
-            return factors
+    def getAAFormFactor(self, qval, atomffs, coords):
+        if qval == 0:
+            return np.sum(atomffs) # returning the sum of the form factors when q is 0
         else:
-            for k in range(0,len(params)):
-                for l in range(0,len(params)):
-                    if k == l:
-                        continue
-                    else:
-                        Frh = getr_kl(df_struct, k, l)
-                        factors += (curve[params[k]] * curve[params[l]] * (np.sin(qval * Frh)) / (qval * Frh))
-                        #factors += np.sqrt(curve[params[k]]**2 + curve[params[l]]**2 + (2 * curve[params[k]] * curve[params[l]] * np.sin(qval * Frh)) / (qval * Frh))
-            return cmath.sqrt(factors)
-
-    def getAAFormFactorDummy(self, q, curveDummy, params):
-        factors = np.zeros(len(q))
-        for i in range(len(factors)):
-            for p in range(len(params)):
-                factors[i] += curveDummy[params[p]][i]
-        return factors  
-
-# Function to fit the form factor of the protein structure - ref. Single bead approximation 2.1.4
-"""def fit_formfactor(df_struct, q_new):
-    curve = {}
-    Factors = []
-    q = np.linspace(0.7, 1.5, 10)
-    q = np.insert(q, 0, 0.0)
-    a = df_struct["Element"].values
-    for qval in q:
-        for p in a:
-            curve[p] = np.zeros(11)
-        curveDummy = curve.copy()
-        saxs_params = cSAXSparameters(a, qval, curve, curveDummy)
-        curve, curveDummy = saxs_params.computeFormFactors( a, qval, curve, curveDummy)
-        factors = saxs_params.getAAFormFactor(qval, curve, a, radius)
-        Factors.append(factors)
-    Factors = np.array(Factors)
-    # six polynomial coefficients for each aa type
-    coeff = np.polyfit(q, Factors, 6)
-    polynomial = np.poly1d(coeff)
-    f_fit = polynomial(q_new)
-    return f_fit """
+            #calculate the distance matrix
+            dgram = np.sqrt(np.sum((coords[..., None, :] - coords[..., None, :, :]) ** 2, axis=-1))
+            #create the qr matrix
+            dq = dgram * qval
+            #create the form factor matrix
+            aff_matrix = (atomffs[None] * atomffs[:, None])
+            #create the amino acid form factors matrix
+            aff_matrix = np.tile(aff_matrix, (len(coords), 1, 1))
+            Factors = np.zeros_like(aff_matrix)
+            # calculate the aa form factors
+            diag = dq <1e-6
+            Factors[diag] = aff_matrix[diag] * (1 - 1/6 * (dq[diag])**2)
+            Factors[~diag] = aff_matrix[~diag] * (np.sin(dq[~diag]) / dq[~diag])
+            
+        return np.sqrt(np.sum(Factors, axis=(1,2)))
 
 
 # Calculate distances 
@@ -231,7 +184,7 @@ def getAAFormFactor_fast(dgram, q, ff, eps=1e-6):
     # implements Eq.10 and Eq.11
 
     # distance * q
-    dq = dgram[..., None] * q
+    dq = dgram * q
 
     # ff in matrix form
     ffmat = (ff[None] * ff[:, None])
