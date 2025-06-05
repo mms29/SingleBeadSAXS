@@ -1,2 +1,11 @@
 SingleBeadSAXS/*.csv
 outputs/ *.png
+.DS_Store
+# Ignore all files in the Rust-voronota directory
+Rust-voronota/
+.vscode/
+SingleBeadSAXS/*.ipynb
+SingleBeadSAXS/test_voronota.py
+ff-tables/
+__pycache__/
+SingleBeadSAXS/__init__.py
