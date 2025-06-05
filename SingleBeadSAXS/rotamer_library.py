@@ -1,7 +1,7 @@
 
 import sys
-import matplotlib.pyplot as plt
-import tqdm
+#import matplotlib.pyplot as plt
+#import tqdm
 import collections
 import os
 import pyrosetta as pr

@@ -350,3 +350,26 @@ def get_res_map_martini(
         mapping =  {k:{i:v2 for i,v2 in v.items() if not i.startswith("H")} for k, v in mapping.items()}
     return mapping
 
+# Dictionary containing the radius of respective amino acids
+amino_acid_radii = {
+        "ALA": 3.1,
+        "ARG": 4.0,
+        "ASN": 3.6,
+        "ASP": 3.6,
+        "CYS": 3.6,
+        "GLU": 3.8,
+        "GLN": 3.8,
+        "GLY": 2.9,
+        "HIS": 3.9,
+        "ILE": 3.6,
+        "LEU": 3.6,
+        "LYS": 3.7,
+        "MET": 3.8,
+        "PHE": 3.9,
+        "PRO": 3.4,
+        "SER": 3.3,
+        "THR": 3.5,
+        "TRP": 4.3,
+        "TYR": 4.1,
+        "VAL": 3.4,
+}
