@@ -202,8 +202,7 @@ class cSAXSparameters:
         fc = F.c + F.a1 * np.exp(-q2 * F.b1) + F.a2 * np.exp(-q2 * F.b2) + F.a3 * np.exp(-q2 * F.b3) + F.a4 * np.exp(-q2 * F.b4) + F.a5 * np.exp(-q2 * F.b5)
         f = 0
         if q == 0:
-            epsilon = 1e-6  # Small value to avoid division by zero
-            f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh + epsilon))
+            f = fc + F.h * fh # for q = 0, we just return the form factors combined
         else:
             f = np.sqrt(fc * fc + F.h * F.h * fh * fh + 2 * fc * F.h * fh * np.sin(q * F.rh) / (q * F.rh))
             #f = fc + F.h * fh * np.sin(q * F.rh) / (q * F.rh)
