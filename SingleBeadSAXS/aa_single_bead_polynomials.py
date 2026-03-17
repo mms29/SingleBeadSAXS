@@ -55,7 +55,7 @@ for restype in restype_1to3.keys():
     ff_excl = ff #-ffDummy
 
 
-        
+
             
         #dgram = calculate_distogram(all)
     F = saxs_params.getAAFormFactor(qfits, ff_excl, all_coordinates_non_hydrogen)

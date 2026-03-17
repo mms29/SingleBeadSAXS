@@ -9,3 +9,5 @@ SingleBeadSAXS/test_voronota.py
 ff-tables/
 __pycache__/
 SingleBeadSAXS/__init__.py
+*.csv
+

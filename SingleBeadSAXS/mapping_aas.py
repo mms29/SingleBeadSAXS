@@ -305,7 +305,7 @@ def map_pyrosetta_martini_names(atom_names, restype3, martini_mapping):
     return martini_mapped
 
 import os
-from rotamer_library import restypes3
+from .rotamer_library import restypes3
 
 # Read the file of Martini mapping for one residue
 def read_mapping_martini(file):
@@ -332,8 +332,8 @@ def read_mapping_martini(file):
 # map each residue to martini beads
 def get_res_map_martini(
         mapping_path,
-        charmm_or_gromo = False,
-        remove_hydrogens=False
+        charmm_or_gromo = True,
+        remove_hydrogens= False
 ):
 
     if not charmm_or_gromo:

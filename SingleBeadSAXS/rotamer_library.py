@@ -1,7 +1,7 @@
 
 import sys
 #import matplotlib.pyplot as plt
-#import tqdm
+import tqdm
 import collections
 import os
 import pyrosetta as pr
@@ -165,6 +165,7 @@ def all_atom_coordinates_from_restype(restype, db):
     residx = restypes.index(restype)
     restype3 = restype_1to3[restype]
     num_chi = int(sum(chi_angles_mask[residx]))
+    print(f"num_chi {num_chi}")
     pose = pr.pose_from_sequence(restype)
     names = names_from_pose(pose, element_or_name=False)
     elements = names_from_pose(pose, element_or_name=True)
@@ -176,6 +177,8 @@ def all_atom_coordinates_from_restype(restype, db):
         backbone_confs = db_res[['Phi', 'Psi']].drop_duplicates().to_numpy()
         nconf = backbone_confs.shape[0]
         probs = np.array(db_res["Probabil"])/nconf
+        #probs = np.array(db_res["Probabil"])
+        #probs /= probs.sum()
     # backbone only residues
     else: 
         backbone_confs = db["pro"][['Phi', 'Psi']].drop_duplicates().to_numpy() # get the backbone conf of another residue, PRO by default
@@ -184,6 +187,7 @@ def all_atom_coordinates_from_restype(restype, db):
         db_res["Phi"] = backbone_confs[:,0]
         db_res["Psi"] = backbone_confs[:,1]
         probs=np.ones(nconf)*(1/nconf)
+ 
 
     all_coordinates=[]
     for rotamer  in tqdm.tqdm(db_res.itertuples()):
