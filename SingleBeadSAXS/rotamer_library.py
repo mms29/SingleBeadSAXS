@@ -1,5 +1,5 @@
 
-import sys
+
 #import matplotlib.pyplot as plt
 import tqdm
 import collections
@@ -165,7 +165,6 @@ def all_atom_coordinates_from_restype(restype, db):
     residx = restypes.index(restype)
     restype3 = restype_1to3[restype]
     num_chi = int(sum(chi_angles_mask[residx]))
-    print(f"num_chi {num_chi}")
     pose = pr.pose_from_sequence(restype)
     names = names_from_pose(pose, element_or_name=False)
     elements = names_from_pose(pose, element_or_name=True)

@@ -416,7 +416,7 @@ class cSAXSparameters:
         """
         atomffs = np.zeros(len(params)) # form factors for the atoms
         for nr, it in enumerate(params):
-            atomffs[nr] =self.getFormFactor(q, it) - self.getDummyAtomsFactorFraser(q, it) # self.getDummyAtomsFactor(q, it) # remove the dummy atoms contribution
+            atomffs[nr] = self.getFormFactor(q, it) #- self.getDummyAtomsFactorSvergun(q, it) # self.getDummyAtomsFactor(q, it) # remove the dummy atoms contribution
         return atomffs # returning the exclusion form factors - have removed the displaced solvent contribution
 
     
@@ -518,6 +518,7 @@ def getAAFormFactor_fast(dgram, q, ff, eps=1e-6):
     F = np.sqrt(np.sum(F, axis=(-2,-3)))
 
     # Eq.11
+    
     F[..., q==0.0] = np.sum(ff[...,q==0.0])
 
     return F

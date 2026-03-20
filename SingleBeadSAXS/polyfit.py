@@ -6,7 +6,7 @@ from formfactor import cSAXSparameters, poly6d_fixed
 import tqdm
 import csv
 
-from numpy.polynomial import Polynomial
+#from numpy.polynomial import Polynomial
 
 pr.init()
 
@@ -14,7 +14,7 @@ libpath = '/home/isabel/Documents/Pepsi-SAXs_articles/dunbrack-rotamer/dunbrack-
 db = load_rotamor_library(libpath)
 
 
-with open('poly_fullFraser2.csv', 'w', newline='') as csvfile:
+with open('poly_test.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['Restype', 'Coefficient Index', 'Value'])
 
@@ -24,12 +24,13 @@ with open('poly_fullFraser2.csv', 'w', newline='') as csvfile:
         
         all_coordinates, atom_names, elements, probs = all_atom_coordinates_from_restype(restype, db)
         n_rotamer = len(all_coordinates)
+        print(probs, np.sum(probs))
         print("Number of rotamers found in Dunbrack lib: %i"%n_rotamer)
         print(atom_names, restype3)
         
         atom_names_mapped = map_pyrosetta_atom_names(atom_names, restype3)
         # let's remove the hydrogrens from the coordinates
-        
+        print(atom_names_mapped)
         atom_names_mapped[4] = None
         non_hydrogen_indices = [i for i, n in enumerate(atom_names_mapped) if n is not None]
         all_coordinates_non_hydrogen = all_coordinates[:,non_hydrogen_indices]

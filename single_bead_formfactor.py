@@ -8,11 +8,10 @@ import pandas as pd
 from SingleBeadSAXS.rotamer_library import load_rotamor_library, all_atom_coordinates_from_restype, restype_1to3 
 from SingleBeadSAXS.mapping_aas import map_pyrosetta_atom_names, get_res_map_martini, map_pyrosetta_martini_names
 from SingleBeadSAXS.formfactor import cSAXSparameters, calculate_distogram, getAAFormFactor_fast, poly6d_fixed
-import tqdm
 import matplotlib.cm as cm
-import os 
 import argparse
 import csv
+import tqdm
 
 def main(args):
     output_ff_file = args.output_prefix+ "_ff.csv"
@@ -47,7 +46,7 @@ def main(args):
         outdf = pd.DataFrame()
         outdf["q"] = q
         
-    with open('martini_atomic.csv', 'w', newline='') as csvfile:
+    with open('martini_atomistic.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Restype', 'Bead', 'Coefficient Index', 'Value'])
         
@@ -67,7 +66,7 @@ def main(args):
             n_rotamer = len(all_coordinates)
 
             print("Number of rotamers found in Dunbrack lib: %i"%n_rotamer)
-
+            print(atom_names)
             atom_names_mapped = map_pyrosetta_atom_names(atom_names, restype3)
 
             ## MARTINI mapping
@@ -97,7 +96,7 @@ def main(args):
             non_hydrogen_indices = [i for i, n in enumerate(atom_names_mapped) if n is not None]
             all_coordinates_non_hydrogen = all_coordinates[:,non_hydrogen_indices]
             atom_names_mapped_non_hydrogen = [n for i, n in enumerate(atom_names_mapped) if i in non_hydrogen_indices]
-
+            print(atom_names_mapped_non_hydrogen)
             # I only use the parameters, so no need for the arguments
             saxs_params = cSAXSparameters()
 
@@ -147,7 +146,7 @@ def main(args):
             outdf.to_csv(output_ff_file, index=False, float_format="%.6f")
 
             # Plots ...
-            """fig, ax = plt.subplots(1,1, figsize=(5,4), layout="constrained")
+            fig, ax = plt.subplots(1,1, figsize=(5,4), layout="constrained")
             cmap = cm.get_cmap('tab10') 
 
             # Plots ...
@@ -160,7 +159,7 @@ def main(args):
             ax.set_xlabel("q ", fontsize=14)
             ax.set_ylabel("F(q)", fontsize=14)
 
-            fig.savefig("%s_%s.png"%(output_pngs_dir, restype3), dpi=300)"""
+            fig.savefig("%s_%s.png"%(output_pngs_dir, restype3), dpi=300)
 
 
 if __name__ == "__main__":

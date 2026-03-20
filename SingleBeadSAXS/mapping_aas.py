@@ -1,5 +1,8 @@
 # mapping_aas.py: This file contains the mapping of amino acids to their corresponding groups.
 # Author: Isabel Vinterbladh
+import os
+from rotamer_library import restypes3
+
 ### Class Group defines the types and a corresponding integer value ###
 class Group:
     class Type:
@@ -304,8 +307,6 @@ def map_pyrosetta_martini_names(atom_names, restype3, martini_mapping):
             martini_mapped.append(martini_mapping[restype3][k])
     return martini_mapped
 
-import os
-from .rotamer_library import restypes3
 
 # Read the file of Martini mapping for one residue
 def read_mapping_martini(file):
